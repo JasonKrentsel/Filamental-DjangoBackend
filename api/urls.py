@@ -9,7 +9,7 @@ user_patterns = [
 ]
 
 organization_patterns = [
-    path('get-directory-by-id/<str:directory_id>/',
+    path('get-directory-by-id/<str:id>/',
          views.get_directory_by_id, name='get_directory_by_id'),
 
     path('new-directory/', views.create_directory, name='create_directory'),

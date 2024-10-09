@@ -44,9 +44,9 @@ class File(models.Model):
         'organizations.Organization', on_delete=models.CASCADE)
 
     def upload_file_to(self, filename):
-        return f"organization-data/{self.directory.get_path()}/{filename}"
+        return f"{self.organization.id}/{filename}"
 
-    file = models.FileField(upload_to=upload_file_to)
+    file = models.FileField(upload_to=upload_file_to, max_length=2024)
 
     def __str__(self):
         return self.name

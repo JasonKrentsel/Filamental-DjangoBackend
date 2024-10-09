@@ -79,26 +79,26 @@ def create_Org(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_directory_by_id(request, directory_id):
+def get_directory_by_id(request, id):
     '''
     Get a directory by its id
 
     In the json format, it should be like this:
     {
-        "directory_id": string;
+        "id": string;
     }
 
     This returns a DirectoryContents Object:
 
     DirectoryContents = {
-        "current_directory_id": string;
+        "id": string;
         "name": string;
         "files": FileDescription[];
         "sub_directories": SubDirectoryDescription[];
     }
 
     FileDescription = {
-        "file_id": string;
+        "id": string;
         "name": string;
         "created_at": Date;
         "created_by": string;
@@ -106,19 +106,19 @@ def get_directory_by_id(request, directory_id):
     }
 
     SubDirectoryDescription = {
-        "directory_id": string;
+        "id": string;
         "name": string;
         "created_at": Date;
         "created_by": string;
     }
     '''
 
-    print(f"\033[94mGetting directory by id: {directory_id}\033[0m")
+    print(f"\033[94mGetting directory by id: {id}\033[0m")
 
     try:
-        directory = Directory.objects.get(id=directory_id)
+        directory = Directory.objects.get(id=id)
     except Directory.DoesNotExist:
-        print(f"\033[Directory does not exist: {directory_id}\033[0m")
+        print(f"\033[Directory does not exist: {id}\033[0m")
         return Response({"error": "Directory does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
     # Check if the user has access to the directory's organization
@@ -132,7 +132,7 @@ def get_directory_by_id(request, directory_id):
 
     for file in directory.files.all():
         files.append({
-            "file_id": file.id,
+            "id": file.id,
             "name": file.name,
             "created_at": file.created_at,
             "created_by": file.created_by.getName(),
@@ -141,13 +141,13 @@ def get_directory_by_id(request, directory_id):
 
     for sub_directory in directory.get_children():
         sub_directories.append({
-            "directory_id": sub_directory.id,
+            "id": sub_directory.id,
             "name": sub_directory.name,
             "created_at": sub_directory.created_at,
             "created_by": sub_directory.created_by.getName(),
         })
 
-    return Response({"directory_id": directory.id, "name": directory.name, "files": files, "sub_directories": sub_directories}, status=status.HTTP_200_OK)
+    return Response({"id": directory.id, "name": directory.name, "files": files, "sub_directories": sub_directories}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -166,7 +166,7 @@ def create_directory(request):
     This returns a subdirectory description:
 
     {
-        "directory_id": string;
+        "id": string;
         "name": string;
         "created_at": Date;
         "created_by": string;
@@ -198,7 +198,7 @@ def create_directory(request):
     if serializer.is_valid():
         directory = serializer.save()
         return Response({
-            "directory_id": directory.id,
+            "id": directory.id,
             "name": directory.name,
             "created_at": directory.created_at,
             # TODO: change to user id when we can get it for avatars
@@ -233,7 +233,9 @@ def create_file(request):
         return Response({"error": "You don't have access to this directory's organization"}, status=status.HTTP_403_FORBIDDEN)
 
     # check if there is a file with the same name in the parent directory
-    if parent_directory.files.filter(name=request.data.get('new_file_name')).exists():
+    file_name = request.data.get(
+        'file').name if 'file' in request.data else None
+    if file_name and parent_directory.files.filter(name=file_name).exists():
         return Response({"error": "File with the same name already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = FileCreateSerializer(
