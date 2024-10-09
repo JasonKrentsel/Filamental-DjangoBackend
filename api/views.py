@@ -185,8 +185,13 @@ def create_directory(request):
     except Directory.DoesNotExist:
         parent_directory = None
 
+    # if parent directory doesn't exist, return an error
     if not parent_directory:
         return Response({"error": "Parent directory does not exist or does not belong to the specified organization"}, status=status.HTTP_403_FORBIDDEN)
+
+    # check if there is a directory with the same name in the parent directory
+    if parent_directory.get_children().filter(name=request.data.get('new_directory_name')).exists():
+        return Response({"error": "Directory with the same name already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = DirectoryCreateSerializer(
         data=request.data, context={'request': request})
@@ -226,6 +231,10 @@ def create_file(request):
     # Check if the user has access to the directory's organization
     if not user.organizationRelation.filter(organization_id=parent_directory.organization_id).exists():
         return Response({"error": "You don't have access to this directory's organization"}, status=status.HTTP_403_FORBIDDEN)
+
+    # check if there is a file with the same name in the parent directory
+    if parent_directory.files.filter(name=request.data.get('new_file_name')).exists():
+        return Response({"error": "File with the same name already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = FileCreateSerializer(
         data=request.data, context={'request': request})
