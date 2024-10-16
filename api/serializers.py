@@ -5,6 +5,7 @@ from django.db.transaction import atomic
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from rag.models import RAG_FILE_TYPES, RAGFileProfile
+from celery import shared_task
 
 
 class OrgCreateSerializer(serializers.ModelSerializer):
@@ -54,6 +55,18 @@ class DirectoryCreateSerializer(serializers.ModelSerializer):
         return directory
 
 
+@shared_task
+def create_file_RAG_profile(file_id, organization_id):
+    file = FileModel.objects.get(id=file_id)
+    organization = Organization.objects.get(id=organization_id)
+    print("Creating RAG profile for file: ", file_id,
+          file.name, " in organization: ", organization_id)
+    RAGFileProfile.objects.create(
+        fileInstance=file,
+        organization=organization,
+    )
+
+
 class FileCreateSerializer(serializers.ModelSerializer):
     file = serializers.FileField()
     parent_directory_id = serializers.UUIDField()
@@ -87,15 +100,9 @@ class FileCreateSerializer(serializers.ModelSerializer):
         )
 
         # now we must create the rag file profile, IF it is a supported file type
-        print(fileInstance.file_type)
+
         if fileInstance.file_type in RAG_FILE_TYPES:
-            try:
-                RAGFileProfile.objects.create(
-                    fileInstance=fileInstance,
-                    organization=parent_directory.organization,
-                )
-            except Exception as e:
-                # delete the file we just created
-                fileInstance.delete()
-                raise e
+            create_file_RAG_profile.delay(
+                fileInstance.id, parent_directory.organization.id)
+
         return fileInstance

@@ -208,3 +208,8 @@ SIMPLE_JWT = {
 # media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# CELERY CONFIG
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # URL for redis
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'

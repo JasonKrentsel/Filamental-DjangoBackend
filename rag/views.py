@@ -60,7 +60,8 @@ def post_query(request):
     # get the rag pages of the similar embeddings
     for embedding in similar_embeddings:
         rag_page = RAGPage.objects.get(id=embedding['rag_page_id'])
-        embedding['page'] = rag_page.page_number
-        embedding['name'] = rag_page.rag_file_profile.file.name
+        embedding['file_id'] = rag_page.rag_file_profile.file.id
+        embedding['file_name'] = rag_page.rag_file_profile.file.name
+        embedding['file_page'] = rag_page.page_number
 
     return Response(similar_embeddings, status=status.HTTP_200_OK)

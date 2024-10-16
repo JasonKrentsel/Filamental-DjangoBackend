@@ -1,0 +1,18 @@
+This requires 3 things:
+1. Django
+2. Celery
+3. Redis
+
+
+1. Django
+
+Python manage.py runserver
+
+2. Celery
+
+Celery -A main-app worker --loglevel=info --pool=solo
+
+3. Redis
+
+wsl -d Ubuntu
+sudo service redis-server start

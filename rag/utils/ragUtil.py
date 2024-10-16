@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 from PIL.Image import Image
 from pdf2image import convert_from_path
@@ -85,7 +86,6 @@ def run_rag(query: str, embeddings_with_ids: list[dict], top_k: int = 5) -> list
 
     Expected output:
     {
-        'embedding': [embedding],
         'rag_page_id': [rag_page_id],
         'similarity_score': [similarity_score]
     }
@@ -104,6 +104,10 @@ def run_rag(query: str, embeddings_with_ids: list[dict], top_k: int = 5) -> list
             'rag_page_id': embedding['rag_page_id'],
             'similarity_score': similarity_score
         })
+
+    # some pages have multiple embeddings, we should only keep the highest similarity score
+    scores_with_ids = [max(group, key=lambda x: x['similarity_score'])
+                       for _, group in itertools.groupby(scores_with_ids, key=lambda x: x['rag_page_id'])]
 
     # sort the embeddings by similarity score
     scores_with_ids.sort(
