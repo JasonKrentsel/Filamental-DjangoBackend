@@ -6,7 +6,7 @@ from django.db.transaction import atomic
 class OrganizationModelManager(models.Manager):
     @atomic
     def create_organization(self, name, ownerUser):
-        DirectoryModel = apps.get_model('filesystem', 'Directory')
+        DirectoryModel = apps.get_model('filesystem', 'DirectoryModel')
 
         organization = super().create(
             name=name, owner=ownerUser)

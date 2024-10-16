@@ -32,19 +32,13 @@ class UserModelManager(BaseUserManager):
 
     # Create a SUPERuser with a new organization
     @atomic
-    def create_superuser(self, email, password, organization_name, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True)
+    def create_superuser(self, email, password, first_name, last_name, **extra_fields):
+        user = self.create_user(email, password, first_name, last_name)
 
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
+        user.is_staff = True
+        user.is_superuser = True
+        user.is_active = True
 
-        user = self.create_user_with_new_organization(
-            email, password, organization_name)
-        for key, value in extra_fields.items():
-            setattr(user, key, value)
         user.save(using=self._db)
+
         return user

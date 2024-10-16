@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.transaction import atomic
 
-from filesystem.models import Directory
+from filesystem.models import DirectoryModel
 from .serializers import DirectoryCreateSerializer, OrgCreateSerializer, FileCreateSerializer
 
 
@@ -116,8 +116,8 @@ def get_directory_by_id(request, id):
     print(f"\033[94mGetting directory by id: {id}\033[0m")
 
     try:
-        directory = Directory.objects.get(id=id)
-    except Directory.DoesNotExist:
+        directory = DirectoryModel.objects.get(id=id)
+    except DirectoryModel.DoesNotExist:
         print(f"\033[Directory does not exist: {id}\033[0m")
         return Response({"error": "Directory does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -177,12 +177,12 @@ def create_directory(request):
 
     try:
         parent_directory_id = request.data.get('parent_directory_id')
-        parent_directory = Directory.objects.get(id=parent_directory_id)
+        parent_directory = DirectoryModel.objects.get(id=parent_directory_id)
 
         # Check if the user has access to the parent directory's organization
         if not user.organizationRelation.filter(organization_id=parent_directory.organization_id).exists():
             return Response({"error": "You don't have access to this directory's organization"}, status=status.HTTP_403_FORBIDDEN)
-    except Directory.DoesNotExist:
+    except DirectoryModel.DoesNotExist:
         parent_directory = None
 
     # if parent directory doesn't exist, return an error
@@ -226,7 +226,7 @@ def create_file(request):
     user = request.user
 
     parent_directory_id = request.data.get('parent_directory_id')
-    parent_directory = Directory.objects.get(id=parent_directory_id)
+    parent_directory = DirectoryModel.objects.get(id=parent_directory_id)
 
     # Check if the user has access to the directory's organization
     if not user.organizationRelation.filter(organization_id=parent_directory.organization_id).exists():

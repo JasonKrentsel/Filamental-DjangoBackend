@@ -14,7 +14,7 @@ class Organization(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owner_of', null=False, blank=False)
     storage_limit_gb = models.IntegerField(default=10)
     root_directory = models.ForeignKey(
-        'filesystem.Directory', on_delete=models.CASCADE, related_name='root_directory', null=True)
+        'filesystem.DirectoryModel', on_delete=models.CASCADE, related_name='root_directory', null=True)
 
     objects = OrganizationModelManager()
 

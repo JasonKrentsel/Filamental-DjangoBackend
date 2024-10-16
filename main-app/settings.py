@@ -1,3 +1,12 @@
+from django.core.management.utils import get_random_secret_key
+from pathlib import Path
+import os
+from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 """
 Django settings for Filamental / main-app project.
 
@@ -9,10 +18,6 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-from datetime import timedelta
-import os
-from pathlib import Path
-from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,6 +56,8 @@ INSTALLED_APPS = [
     "users",
     "organizations",
     "filesystem",
+    "rag",
+    "api",
 ]
 
 MIDDLEWARE = [

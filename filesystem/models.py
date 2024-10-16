@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class Directory(MP_Node):
+class DirectoryModel(MP_Node):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False)  # Edit 1
     name = models.CharField(max_length=255)
@@ -29,15 +29,16 @@ class Directory(MP_Node):
         return '/'.join([str(ancestor.id) for ancestor in full_path])
 
 
-class File(models.Model):
+class FileModel(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False)  # Edit 2
     name = models.CharField(max_length=255)
     directory = models.ForeignKey(
-        Directory, on_delete=models.CASCADE, related_name='files')
+        DirectoryModel, on_delete=models.CASCADE, related_name='files')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     file_size = models.IntegerField(default=0)
+    file_type = models.CharField(max_length=10, default='')
     created_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='created_files')
     organization = models.ForeignKey(
@@ -50,3 +51,9 @@ class File(models.Model):
 
     def __str__(self):
         return self.name
+
+    def delete(self, *args, **kwargs):
+        # Delete the file from the storage
+        self.file.delete(save=False)
+        # Call the superclass delete method to delete the instance
+        super().delete(*args, **kwargs)
