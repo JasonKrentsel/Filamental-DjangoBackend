@@ -60,6 +60,7 @@ def summarize_text_with_image(text: str, image_base64: str) -> str:
 
 
 embedding_model = "BAAI/bge-base-en-v1.5"
+embedding_dimensions = 768
 embedding_max_tokens = 256
 
 

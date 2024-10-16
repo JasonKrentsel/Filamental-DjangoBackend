@@ -1,3 +1,4 @@
+import numpy as np
 from PIL.Image import Image
 from pdf2image import convert_from_path
 import os
@@ -66,3 +67,46 @@ def file_to_summaries(fileInstance: FileModel) -> list[str]:
 def summary_to_embeddings(summary: str) -> list[list[float]]:
     debug_print("Generating embeddings for summary")
     return generate_embeddings(summary)
+
+
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+
+def run_rag(query: str, embeddings_with_ids: list[dict], top_k: int = 5) -> list[dict]:
+    '''
+    Run RAG on the query and return the most similar embeddings
+
+    Expected input:
+    {
+        'embedding': [embedding],
+        'rag_page_id': [rag_page_id]
+    }
+
+    Expected output:
+    {
+        'embedding': [embedding],
+        'rag_page_id': [rag_page_id],
+        'similarity_score': [similarity_score]
+    }
+    '''
+
+    query_embeddings = generate_embeddings(query)
+
+    scores_with_ids = []
+
+    for embedding in embeddings_with_ids:
+        similarity_score = 0
+        for query_embedding in query_embeddings:
+            similarity_score += cosine_similarity(
+                np.array(query_embedding), np.array(embedding['embedding']))
+        scores_with_ids.append({
+            'rag_page_id': embedding['rag_page_id'],
+            'similarity_score': similarity_score
+        })
+
+    # sort the embeddings by similarity score
+    scores_with_ids.sort(
+        key=lambda x: x['similarity_score'], reverse=True)
+
+    return scores_with_ids[:top_k]

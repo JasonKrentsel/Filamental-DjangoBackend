@@ -103,6 +103,7 @@ def get_directory_by_id(request, id):
         "created_at": Date;
         "created_by": string;
         "file_size": number;
+        "embedded": boolean;
     }
 
     SubDirectoryDescription = {
@@ -137,6 +138,7 @@ def get_directory_by_id(request, id):
             "created_at": file.created_at,
             "created_by": file.created_by.getName(),
             "file_size": file.file_size,
+            "embedded": file.rag_file_profile.exists(),
         })
 
     for sub_directory in directory.get_children():
